@@ -1,0 +1,7 @@
+name: AddonBrouteuse
+version: @version@
+main: fr.skydream.addonbrouteuse.AddonBrouteuse
+api-version: 1.16
+depend: [ Jobs, Oraxen ]
+authors: [ Augma ]
+description: Addon Oraxen x Jobs pour fixe le gain d'expérience métier avec les brouteuse sur SkyDream
