@@ -53,15 +53,12 @@ public class HarvestAndPlantMechanicManager implements Listener {
         HarvestAndPlantMechanic mechanic = (HarvestAndPlantMechanic) factory.getMechanic(itemID);
 
         Player player = event.getPlayer();
-        List<Block> nearbyBlock = HarvestMechanicManager.getNearbyBlocks(event.getClickedBlock().getLocation(), mechanic.getRadius(),
-                mechanic.getHeight());
-        List<ItemStack> playerSeed = PlantMechanicManager.getSeed(player, nearbyBlock.size());
         JobsPlayer jPlayer = Jobs.getPlayerManager().getJobsPlayer(player);
-
+        Material playerSeed;
         BlockActionInfo bInfo;
-        int i = 0;
 
-        for (Block block : nearbyBlock) {
+        for (Block block : HarvestMechanicManager.getNearbyBlocks(event.getClickedBlock().getLocation(), mechanic.getRadius(),
+                mechanic.getHeight())) {
             if (block.getBlockData() instanceof Ageable) {
                 if (worldGuardCompatibility != null && !worldGuardCompatibility.canBreak(player, block))
                     return;
@@ -72,15 +69,17 @@ public class HarvestAndPlantMechanicManager implements Listener {
                     block.breakNaturally();
                 }
             }
-            if (block.getType() == Material.FARMLAND) {
+            if (block.getType().equals(Material.FARMLAND)) {
                 if(PlantMechanicManager.hasSeeds(player)) {
                     Block upperBlock = block.getLocation().add(0, 1, 0).getBlock();
                     if (upperBlock.getType().equals(Material.AIR)) {
-                        upperBlock.setType(playerSeed.get(i).getType());
-                        PlantMechanicManager.removeItem(new ItemStack(PlantMechanicManager.getItemSeed(playerSeed.get(i).getType()), 1), player);
-                        bInfo = new BlockActionInfo(upperBlock, ActionType.PLACE);
-                        Jobs.action(jPlayer, bInfo, upperBlock);
-                        i++;
+                        playerSeed = PlantMechanicManager.getSeeds(player);
+                        if(!playerSeed.equals(Material.AIR)) {
+                            upperBlock.setType(playerSeed);
+                            PlantMechanicManager.removeItem(new ItemStack(PlantMechanicManager.getItemSeed(playerSeed), 1), player);
+                            bInfo = new BlockActionInfo(upperBlock, ActionType.PLACE);
+                            Jobs.action(jPlayer, bInfo, upperBlock);
+                        }
                     }
                 }
             }

@@ -56,23 +56,23 @@ public class PlantMechanicManager implements Listener {
         Player player = event.getPlayer();
 
         BlockActionInfo bInfo;
-        List<Block> nearbyBlock = getNearbyBlocks(event.getClickedBlock().getLocation(), mechanic.getRadius(), mechanic.getHeight());
-        List<ItemStack> playerSeed = getSeed(player, nearbyBlock.size());
-        int i = 0;
+        Material playerSeed;
         JobsPlayer jPlayer = Jobs.getPlayerManager().getJobsPlayer(player);
 
-        for (Block block : nearbyBlock) {
+        for (Block block : getNearbyBlocks(event.getClickedBlock().getLocation(), mechanic.getRadius(), mechanic.getHeight())) {
             if (worldGuardCompatibility != null && !worldGuardCompatibility.canBreak(player, block))
                 return;
             if (block.getType() == Material.FARMLAND) {
                 if(hasSeeds(player)) {
                     Block upperBlock = block.getLocation().add(0, 1, 0).getBlock();
                     if (upperBlock.getType().equals(Material.AIR)) {
-                        upperBlock.setType(playerSeed.get(i).getType());
-                        removeItem(new ItemStack(getItemSeed(playerSeed.get(i).getType()), 1), player);
-                        bInfo = new BlockActionInfo(upperBlock, ActionType.PLACE);
-                        Jobs.action(jPlayer, bInfo, upperBlock);
-                        i++;
+                        playerSeed = getSeeds(player);
+                        if(!playerSeed.equals(Material.AIR)) {
+                            upperBlock.setType(playerSeed);
+                            removeItem(new ItemStack(getItemSeed(playerSeed), 1), player);
+                            bInfo = new BlockActionInfo(upperBlock, ActionType.PLACE);
+                            Jobs.action(jPlayer, bInfo, upperBlock);
+                        }
                     }
                 }
             }
@@ -112,54 +112,23 @@ public class PlantMechanicManager implements Listener {
         return player.getInventory().contains(Material.NETHER_WART);
     }
 
+    public static Material getSeeds(Player player) {
+        if(player.getInventory().contains(Material.WHEAT_SEEDS)) {
+            return Material.WHEAT;
+        } else if(player.getInventory().contains(Material.BEETROOT_SEEDS)) {
+            return Material.BEETROOTS;
+        } else if(player.getInventory().contains(Material.CARROT)) {
+            return Material.CARROTS;
+        } else if(player.getInventory().contains(Material.POTATO)) {
+            return Material.POTATOES;
+        } else {
+            return Material.AIR;
+        }
+
+    }
+
     public static void removeItem(ItemStack item, HumanEntity player) {
         player.getInventory().removeItem(item);
-    }
-
-    public static List<ItemStack> getSeed(HumanEntity player, int nbNeeded) {
-        List<ItemStack> seeds = new ArrayList<>();
-
-        for(ItemStack is : getPlayerSeedList(player)) {
-            for(int i = 0; i < is.getAmount(); i++) {
-                if(seeds.size() == nbNeeded) break;
-                seeds.add(new ItemStack(getSeedItem(is.getType()), 1));
-            }
-        }
-
-        return seeds;
-    }
-
-    public static List<ItemStack> getPlayerSeedList(HumanEntity player) {
-        List<Material> seed = new ArrayList<>();
-        List<ItemStack> playerSeed = new ArrayList<>();
-        int index = 0;
-
-        seed.add(Material.WHEAT_SEEDS);
-        seed.add(Material.BEETROOT_SEEDS);
-        seed.add(Material.CARROT);
-        seed.add(Material.POTATO);
-
-        for(Material mat : seed) {
-            index = player.getInventory().first(mat);
-            if(index != -1) playerSeed.add(player.getInventory().getItem(index));
-        }
-
-        return playerSeed;
-    }
-
-    private static Material getSeedItem(Material mat) {
-        switch(mat) {
-            case BEETROOT_SEEDS:
-                return Material.BEETROOTS;
-            case WHEAT_SEEDS:
-                return Material.WHEAT;
-            case POTATO:
-                return Material.POTATOES;
-            case CARROT:
-                return Material.CARROTS;
-            default:
-                return Material.AIR;
-        }
     }
 
     public static Material getItemSeed(Material mat) {
