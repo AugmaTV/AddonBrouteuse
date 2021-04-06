@@ -60,7 +60,7 @@ public class PlantMechanicManager implements Listener {
         JobsPlayer jPlayer = Jobs.getPlayerManager().getJobsPlayer(player);
 
         for (Block block : getNearbyBlocks(event.getClickedBlock().getLocation(), mechanic.getRadius(), mechanic.getHeight())) {
-            if (worldGuardCompatibility != null && !worldGuardCompatibility.canBreak(player, block))
+            if (worldGuardCompatibility != null && !worldGuardCompatibility.cannotBreak(player, block))
                 return;
             if (block.getType() == Material.FARMLAND) {
                 if(hasSeeds(player)) {

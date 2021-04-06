@@ -17,10 +17,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class HarvestMechanicManager implements Listener {
     private final MechanicFactory factory;
@@ -57,12 +56,18 @@ public class HarvestMechanicManager implements Listener {
         for (Block block : getNearbyBlocks(event.getClickedBlock().getLocation(), mechanic.getRadius(),
                 mechanic.getHeight())) {
             if (block.getBlockData() instanceof Ageable) {
-                if (worldGuardCompatibility != null && !worldGuardCompatibility.canBreak(player, block))
+                if (worldGuardCompatibility != null && worldGuardCompatibility.cannotBreak(player, block))
                     return;
                 Ageable ageable = (Ageable) block.getBlockData();
                 if (ageable.getAge() == ageable.getMaximumAge()) {
                     bInfo = new BlockActionInfo(block, ActionType.BREAK);
                     Jobs.action(Jobs.getPlayerManager().getJobsPlayer(player), bInfo, block);
+                    ItemStack itemOffHand = player.getInventory().getItemInOffHand() != null ? player.getInventory().getItemInOffHand() : null;
+                    ItemMeta itemOffHandMeta = itemOffHand != null ? itemOffHand.getItemMeta() : null;
+                    if(itemOffHandMeta == null) {
+                    }
+                    String itemName = itemOffHandMeta != null ? itemOffHandMeta.getLocalizedName() : "null";
+                    player.sendMessage(itemName);
                     block.breakNaturally();
                 }
             }
